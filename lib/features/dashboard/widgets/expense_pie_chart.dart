@@ -67,9 +67,14 @@ class ExpensePieChart extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Text(
-                      Formatters.formatCurrency(item['total'] as int),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    Flexible(
+                      child: Text(
+                        Formatters.formatCurrency(item['total'] as int),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                      ),
                     ),
                   ],
                 ),
