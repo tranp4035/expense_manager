@@ -18,13 +18,17 @@ class TransactionTile extends StatelessWidget {
     
     return ListTile(
       onTap: onTap,
-      leading: CircleAvatar(
-        backgroundColor: isIncome ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
-        child: Icon(
-          isIncome ? Icons.arrow_downward : Icons.arrow_upward,
-          color: isIncome ? Colors.green : Colors.red,
+      leading: Hero(
+        tag: 'tx-icon-${transaction.id}',
+        child: CircleAvatar(
+          backgroundColor: isIncome ? Colors.green.withValues(alpha: 0.1) : Colors.red.withValues(alpha: 0.1),
+          child: Icon(
+            isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+            color: isIncome ? Colors.green : Colors.red,
+          ),
         ),
       ),
+
       title: Text(
         transaction.note?.isNotEmpty == true ? transaction.note! : 'Không có ghi chú',
         maxLines: 1,

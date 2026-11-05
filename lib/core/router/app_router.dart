@@ -5,6 +5,7 @@ import '../../features/transactions/transaction_list_screen.dart';
 import '../../features/budgets/budget_list_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/transactions/transaction_form_screen.dart';
+import '../../features/transactions/transaction_detail_screen.dart';
 import '../../features/settings/category_management_screen.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -45,6 +46,14 @@ final GoRouter appRouter = GoRouter(
                     return TransactionFormScreen(transactionId: int.parse(id!));
                   },
                 ),
+                  GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final id = int.parse(state.pathParameters['id']!);
+                    return TransactionDetailScreen(transactionId: id);
+                  },
+                ),
+
               ],
             ),
           ],

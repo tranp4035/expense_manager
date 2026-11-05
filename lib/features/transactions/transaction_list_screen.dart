@@ -85,9 +85,7 @@ class TransactionListScreen extends ConsumerWidget {
               return TransactionTile(
                 transaction: tx,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Bấm vào giao dịch ID: ${tx.id}')),
-                  );
+                  context.push('/transactions/${tx.id}');
                 },
               );
             },
