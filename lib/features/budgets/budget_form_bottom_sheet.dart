@@ -19,6 +19,12 @@ class _BudgetFormBottomSheetState extends ConsumerState<BudgetFormBottomSheet> {
   bool _isLoading = false;
 
   @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesByTypeProvider('expense'));
 

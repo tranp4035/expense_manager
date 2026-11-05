@@ -60,14 +60,36 @@ class DashboardScreen extends ConsumerWidget {
                   final expense = summary['expense'] ?? 0;
                   final balance = income - expense;
 
-                  return Row(
-                    children: [
-                      _buildSummaryCard('Thu nhập', income, Colors.green, Icons.arrow_downward),
-                      const SizedBox(width: 8),
-                      _buildSummaryCard('Chi tiêu', expense, Colors.red, Icons.arrow_upward),
-                      const SizedBox(width: 8),
-                      _buildSummaryCard('Chênh lệch', balance, balance >= 0 ? Colors.blue : Colors.orange, Icons.account_balance_wallet),
-                    ],
+                  final cards = [
+                    _buildSummaryCard('Thu nhập', income, Colors.green, Icons.arrow_downward),
+                    _buildSummaryCard('Chi tiêu', expense, Colors.red, Icons.arrow_upward),
+                    _buildSummaryCard('Chênh lệch', balance, balance >= 0 ? Colors.blue : Colors.orange, Icons.account_balance_wallet),
+                  ];
+
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth < 520) {
+                        return Column(
+                          key: const ValueKey('dashboard-summary-column'),
+                          children: cards
+                              .map((card) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: SizedBox(width: double.infinity, child: card),
+                                  ))
+                              .toList(),
+                        );
+                      }
+                      return Row(
+                        key: const ValueKey('dashboard-summary-row'),
+                        children: [
+                          Expanded(child: cards[0]),
+                          const SizedBox(width: 8),
+                          Expanded(child: cards[1]),
+                          const SizedBox(width: 8),
+                          Expanded(child: cards[2]),
+                        ],
+                      );
+                    },
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -89,15 +111,30 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // 3. 5 GIAO DỊCH GẦN NHẤT
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Giao dịch gần đây', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  TextButton(
-                    onPressed: () => context.go('/transactions'), // Chuyển sang tab Giao dịch
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final viewAllButton = TextButton(
+                    onPressed: () => context.go('/transactions'),
                     child: const Text('Xem tất cả'),
-                  )
-                ],
+                  );
+                  if (constraints.maxWidth < 360) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Giao dịch gần đây', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Align(alignment: Alignment.centerRight, child: viewAllButton),
+                      ],
+                    );
+                  }
+                  return Row(
+                    children: [
+                      const Expanded(
+                        child: Text('Giao dịch gần đây', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                      viewAllButton,
+                    ],
+                  );
+                },
               ),
               txListAsync.when(
                 data: (transactions) {
@@ -133,8 +170,7 @@ class DashboardScreen extends ConsumerWidget {
 
   // Widget phụ trợ để vẽ các thẻ tóm tắt
   Widget _buildSummaryCard(String title, int amount, Color color, IconData icon) {
-    return Expanded(
-      child: Container(
+    return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
@@ -160,7 +196,6 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

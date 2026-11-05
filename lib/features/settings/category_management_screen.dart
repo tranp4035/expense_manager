@@ -108,58 +108,64 @@ class CategoryManagementScreen extends ConsumerWidget {
   }
 
   // === HÀM HIỂN THỊ DIALOG THÊM DANH MỤC ===
-  void _showAddCategoryDialog(BuildContext context, WidgetRef ref) {
+  Future<void> _showAddCategoryDialog(BuildContext context, WidgetRef ref) async {
     final nameController = TextEditingController();
     String type = 'expense'; // Mặc định là chi tiêu
 
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: const Text('Thêm Danh mục'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: nameController, 
-                  decoration: const InputDecoration(labelText: 'Tên danh mục')
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Thêm Danh mục'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'Tên danh mục'),
+                  ),
+                  const SizedBox(height: 16),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(value: 'expense', label: Text('Chi tiêu')),
+                      ButtonSegment(value: 'income', label: Text('Thu nhập')),
+                    ],
+                    selected: {type},
+                    onSelectionChanged: (val) => setState(() => type = val.first),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Hủy'),
                 ),
-                const SizedBox(height: 16),
-                SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'expense', label: Text('Chi tiêu')),
-                    ButtonSegment(value: 'income', label: Text('Thu nhập')),
-                  ],
-                  selected: {type},
-                  onSelectionChanged: (val) => setState(() => type = val.first),
+                TextButton(
+                  onPressed: () async {
+                    final name = nameController.text.trim();
+                    if (name.isEmpty) return;
+
+                    final newCat = Category(
+                      name: name,
+                      type: type,
+                      color: type == 'income' ? '#4CAF50' : '#F44336',
+                    );
+
+                    await ref.read(categoryRepositoryProvider).insertCategory(newCat);
+                    ref.invalidate(allCategoriesProvider);
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('Lưu'),
                 ),
               ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
-              TextButton(
-                onPressed: () async {
-                  final name = nameController.text.trim();
-                  if (name.isEmpty) return; // Không cho lưu nếu tên trống
-
-                  // Tạo danh mục mới với màu mặc định tùy theo loại
-                  final newCat = Category(
-                    name: name, 
-                    type: type, 
-                    color: type == 'income' ? '#4CAF50' : '#F44336' // Xanh cho thu, Đỏ cho chi
-                  );
-                  
-                  await ref.read(categoryRepositoryProvider).insertCategory(newCat);
-                  ref.invalidate(allCategoriesProvider); // Cập nhật lại list
-                  if (context.mounted) Navigator.pop(context); // Đóng dialog
-                },
-                child: const Text('Lưu'),
-              ),
-            ],
-          );
-        }
-      ),
-    );
+            );
+          },
+        ),
+      );
+    } finally {
+      nameController.dispose();
+    }
   }
 }

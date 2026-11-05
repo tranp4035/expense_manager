@@ -10,6 +10,7 @@ import '../../data/models/money_transaction.dart';
 import '../../providers/transaction_provider.dart';
 import '../../providers/category_provider.dart'; // Sẽ tạo ở dưới
 import '../../providers/budget_provider.dart';
+import '../../data/services/transaction_service.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final int? transactionId; // Null nếu là Thêm mới
@@ -34,6 +35,13 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   bool _isLoading = false;
 
   @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     if (widget.transactionId != null) {
@@ -43,7 +51,7 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
 
   Future<void> _loadTransactionData() async {
     final tx = await ref.read(transactionByIdProvider(widget.transactionId!).future);
-    if (tx != null) {
+    if (tx != null && mounted) {
       setState(() {
         _amountController.text = tx.amount.toString();
         _noteController.text = tx.note ?? '';
@@ -133,38 +141,26 @@ class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
         imagePath: _imagePath,
       );
 
-      final repo = ref.read(transactionRepositoryProvider);
-      if (widget.transactionId == null) {
-        await repo.insertTransaction(tx);
-      } else {
-        await repo.updateTransaction(tx); // Cần thêm hàm này vào Repo
-      }
+      final warningCategory = await ref.read(transactionServiceProvider).saveTransaction(
+        transaction: tx,
+        month: _selectedDate.month,
+        year: _selectedDate.year,
+        checkBudget: _type == 'expense',
+      );
 
       // Load lại danh sách
       ref.invalidate(transactionListProvider);
       ref.invalidate(transactionSummaryProvider);
       ref.invalidate(budgetListProvider); // Update luôn màn ngân sách
 
-      // === KIỂM TRA CẢNH BÁO VƯỢT NGÂN SÁCH ===
-      if (_type == 'expense') {
-        final budgetData = await ref.read(budgetListProvider.future);
-        for (var b in budgetData) {
-          if (b['categoryId'] == _selectedCategoryId) {
-            // Nếu tổng chi > hạn mức
-            if ((b['spentAmount'] as int) > (b['limitAmount'] as int)) {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('CẢNH BÁO: Danh mục "${b['categoryName']}" đã vượt hạn mức ngân sách!'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 4),
-                  ),
-                );
-              }
-              break;
-            }
-          }
-        }
+      if (warningCategory != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('CẢNH BÁO: Danh mục "$warningCategory" đã vượt hạn mức ngân sách!'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
       }
 
       if (mounted) {
