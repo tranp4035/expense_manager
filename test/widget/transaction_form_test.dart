@@ -26,6 +26,12 @@ void main() {
   });
 
   testWidgets('Kiểm tra Form báo lỗi khi nhập số tiền âm', (WidgetTester tester) async {
+    // 1. Tăng kích thước màn hình ảo để không bị tràn
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
@@ -34,16 +40,26 @@ void main() {
       ),
     );
 
-    // 1. Nhập số tiền âm vào ô TextFormField đầu tiên (ô số tiền)
-    // Lưu ý: Cần tìm chính xác ô nhập tiền, ở đây ta tìm theo label hoặc vị trí
+    // 2. Nhập số tiền âm
     final amountField = find.byType(TextFormField).first;
     await tester.enterText(amountField, '-50000');
-
-    // 2. Bấm nút Lưu
-    await tester.tap(find.text('LƯU GIAO DỊCH'));
+    
+    // 3. Ẩn bàn phím ảo đi để không che nút bấm (Rất quan trọng)
+    await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
 
-    // 3. Kiểm tra thông báo lỗi
+    // 4. Cuộn xuống nút Lưu (nếu cần) và bấm
+    final saveButton = find.text('LƯU GIAO DỊCH');
+    await tester.scrollUntilVisible(
+      saveButton,
+      500.0,
+      scrollable: find.byType(Scrollable).first,
+    );
+    
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    // 5. Kiểm tra lỗi
     expect(find.text('Số tiền phải lớn hơn 0'), findsOneWidget);
   });
 }
