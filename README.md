@@ -5,8 +5,8 @@
 1. Trần Tiến Phát - 3122410298
 2. Nguyễn Phước Hòa Lâm - 3123410193
 3. Trần Ngọc Thái Sơn - 3122410361
-4. 
-**Giảng viên hướng dẫn:** 
+4. Phạm Anh Thư - 3120410518
+**Giảng viên hướng dẫn:** Phạm Thi Vương
 
 ---
 
