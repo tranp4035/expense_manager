@@ -14,13 +14,12 @@ final transactionServiceProvider = Provider<TransactionService>((ref) {
 /// Holds transaction write and budget-warning rules outside the presentation layer.
 class TransactionService {
   const TransactionService({
-    required TransactionRepository transactionRepository,
-    required BudgetRepository budgetRepository,
-  }) : _transactionRepository = transactionRepository,
-       _budgetRepository = budgetRepository;
+    required this.transactionRepository,
+    required this.budgetRepository,
+  });
 
-  final TransactionRepository _transactionRepository;
-  final BudgetRepository _budgetRepository;
+  final TransactionRepository transactionRepository;
+  final BudgetRepository budgetRepository;
 
   /// Saves a transaction and returns the exceeded budget category, if any.
   Future<String?> saveTransaction({
@@ -30,14 +29,14 @@ class TransactionService {
     required bool checkBudget,
   }) async {
     if (transaction.id == null) {
-      await _transactionRepository.insertTransaction(transaction);
+      await transactionRepository.insertTransaction(transaction);
     } else {
-      await _transactionRepository.updateTransaction(transaction);
+      await transactionRepository.updateTransaction(transaction);
     }
 
     if (!checkBudget) return null;
 
-    final budgets = await _budgetRepository.getBudgetsWithSpent(month, year);
+    final budgets = await budgetRepository.getBudgetsWithSpent(month, year);
     for (final budget in budgets) {
       if (budget['categoryId'] == transaction.categoryId &&
           (budget['spentAmount'] as int) > (budget['limitAmount'] as int)) {
