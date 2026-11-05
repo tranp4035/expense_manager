@@ -3,7 +3,7 @@
 **Môn học:** Các Công nghệ Lập trình Hiện đại  
 **Sinh viên thực hiện:** 
 1. Trần Tiến Phát - 3122410298
-2. 
+2. Nguyễn Phước Hòa Lâm - 3123410193
 3. 
 4. 
 **Giảng viên hướng dẫn:** 
