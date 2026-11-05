@@ -82,7 +82,7 @@ lib/
 
 Các tính năng dưới đây là minh chứng cho những yêu cầu Tầng 1, 2 và 3 của môn học.
 
-### 🟦 Tầng 1A — Lõi bắt buộc
+### Tầng 1A — Lõi bắt buộc
 
 | Yêu cầu | Minh chứng trong dự án |
 |---|---|
@@ -107,7 +107,7 @@ Các tính năng dưới đây là minh chứng cho những yêu cầu Tầng 1,
 | **Kiểm thử** | Unit Test cho hàm `budgetColor` và Widget Test cho form nhập tiền. |
 | **Tài liệu** | README hướng dẫn và giới thiệu dự án. |
 
-### 🟪 Tầng 3 — Phần cứng và quyền
+### Tầng 3 — Phần cứng và quyền
 
 **Xử lý quyền camera** trong `transaction_form_screen.dart`:
 
