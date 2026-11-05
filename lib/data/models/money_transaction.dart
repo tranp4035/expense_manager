@@ -1,11 +1,12 @@
 class MoneyTransaction {
   final int? id;
-  final int amount; // VND
-  final String type; // 'income' hoặc 'expense'
+  final int amount; 
+  final String type; 
   final int categoryId;
-  final String date; //
+  final String date; // ISO8601
   final String? note;
   final String? imagePath;
+    final String? categoryName; 
 
   const MoneyTransaction({
     this.id,
@@ -15,6 +16,7 @@ class MoneyTransaction {
     required this.date,
     this.note,
     this.imagePath,
+    this.categoryName, 
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class MoneyTransaction {
       date: map['date'] as String,
       note: map['note'] as String?,
       imagePath: map['imagePath'] as String?,
+      categoryName: map['categoryName'] as String?, // Lấy từ SQL
     );
   }
 
@@ -49,6 +52,7 @@ class MoneyTransaction {
     String? date,
     String? note,
     String? imagePath,
+    String? categoryName,
   }) {
     return MoneyTransaction(
       id: id ?? this.id,
@@ -58,6 +62,7 @@ class MoneyTransaction {
       date: date ?? this.date,
       note: note ?? this.note,
       imagePath: imagePath ?? this.imagePath,
+      categoryName: categoryName ?? this.categoryName,
     );
   }
 }

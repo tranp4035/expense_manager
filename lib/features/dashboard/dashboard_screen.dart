@@ -20,7 +20,26 @@ class DashboardScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tổng quan Tháng ${selectedDate.month}/${selectedDate.year}'),
-      ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month),
+            onPressed: () async {
+              // Mở hộp thoại chọn ngày (người dùng chọn ngày nào cũng được, ta chỉ lấy tháng/năm)
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate: DateTime(selectedDate.year, selectedDate.month, 1),
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+                helpText: 'Chọn tháng muốn xem',
+              );
+              
+              if (pickedDate != null) {
+                ref.read(selectedMonthProvider.notifier).changeMonth(pickedDate.month, pickedDate.year);
+              }
+            },
+          ),
+        ],
+      ),      
       body: RefreshIndicator(
         onRefresh: () async {
           // Kéo xuống để làm mới dữ liệu

@@ -9,16 +9,19 @@ class TransactionRepository {
   Future<List<MoneyTransaction>> getTransactionsByMonth(int month, int year) async {
     final db = await _dbHelper.database;
     final monthStr = month.toString().padLeft(2, '0');
-    final pattern = '$year-$monthStr-%'; // VD: 2026-10-%
+    final pattern = '$year-$monthStr-%';
     
-    final maps = await db.query(
-      'transactions',
-      where: "date LIKE ?",
-      whereArgs: [pattern],
-      orderBy: 'date DESC',
-    );
+    final maps = await db.rawQuery('''
+      SELECT t.*, c.name as categoryName 
+      FROM transactions t
+      JOIN categories c ON t.categoryId = c.id
+      WHERE t.date LIKE ?
+      ORDER BY t.date DESC
+    ''', [pattern]);
+    
     return maps.map((map) => MoneyTransaction.fromMap(map)).toList();
   }
+
 
   // Lấy tổng thu, tổng chi (Dùng cho Dashboard)
   Future<Map<String, int>> getSummary(int month, int year) async {

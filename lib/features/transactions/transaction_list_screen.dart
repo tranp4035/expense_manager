@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../providers/transaction_provider.dart';
 import '../../../providers/selected_month_provider.dart';
 import 'widgets/transaction_tile.dart';
+import '../../../providers/budget_provider.dart';
 
 class TransactionListScreen extends ConsumerWidget {
   const TransactionListScreen({super.key});
@@ -17,11 +18,9 @@ class TransactionListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Giao dịch (Tháng ${selectedDate.month}/${selectedDate.year})'),
         actions: [
-          // Nút đổi tháng (sẽ làm logic sau, tạm thời in ra console)
           IconButton(
             icon: const Icon(Icons.calendar_month),
             onPressed: () async {
-              // Hiển thị DatePicker, mặc định chọn ngày đầu tháng hiện tại
               final pickedDate = await showDatePicker(
                 context: context,
                 initialDate: DateTime(selectedDate.year, selectedDate.month, 1),
@@ -31,19 +30,14 @@ class TransactionListScreen extends ConsumerWidget {
               );
               
               if (pickedDate != null) {
-                // Cập nhật Provider, toàn bộ app sẽ tự load lại theo tháng mới
                 ref.read(selectedMonthProvider.notifier).changeMonth(pickedDate.month, pickedDate.year);
               }
             },
           )
-
         ],
       ),
       body: txAsync.when(
-        // 1. TRẠNG THÁI LOADING
         loading: () => const Center(child: CircularProgressIndicator()),
-        
-        // 2. TRẠNG THÁI ERROR
         error: (error, stackTrace) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -59,11 +53,8 @@ class TransactionListScreen extends ConsumerWidget {
             ],
           ),
         ),
-        
-        // 3. TRẠNG THÁI DATA (Có dữ liệu hoặc Rỗng)
         data: (transactions) {
           if (transactions.isEmpty) {
-            // TRẠNG THÁI EMPTY
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -82,24 +73,71 @@ class TransactionListScreen extends ConsumerWidget {
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final tx = transactions[index];
-              return TransactionTile(
-                transaction: tx,
-                onTap: () {
-                  context.push('/transactions/${tx.id}');
+              
+              // BỌC TRONG DISMISSIBLE ĐỂ VUỐT XÓA
+              return Dismissible(
+                key: Key(tx.id.toString()),
+                direction: DismissDirection.endToStart, // Chỉ vuốt từ phải sang trái
+                background: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                confirmDismiss: (direction) async {
+                  // Hỏi xác nhận trước khi xóa
+                  return await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Xác nhận xóa'),
+                      content: const Text('Bạn có chắc chắn muốn xóa giao dịch này?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false), 
+                          child: const Text('Hủy')
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true), 
+                          child: const Text('Xóa', style: TextStyle(color: Colors.red))
+                        ),
+                      ],
+                    ),
+                  );
                 },
+                onDismissed: (direction) async {
+                  // Thực hiện xóa trong Database
+                  final repo = ref.read(transactionRepositoryProvider);
+                  await repo.deleteTransaction(tx.id!);
+                  
+                  // Load lại UI
+                  ref.invalidate(transactionListProvider);
+                  ref.invalidate(transactionSummaryProvider);
+                  ref.invalidate(budgetListProvider); // Cập nhật cả ngân sách
+                  
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Đã xóa giao dịch'), backgroundColor: Colors.green)
+                    );
+                  }
+                },
+                child: TransactionTile(
+                  transaction: tx,
+                  onTap: () {
+                    // Chuyển sang màn hình chi tiết (Hero Animation)
+                    context.push('/transactions/${tx.id}');
+                  },
+                ),
               );
             },
           );
         },
       ),
-      // Nút Thêm giao dịch (+)
-            floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.push('/transactions/add');
         },
         child: const Icon(Icons.add),
       ),
-
     );
   }
 }

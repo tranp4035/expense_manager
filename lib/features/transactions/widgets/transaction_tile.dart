@@ -34,7 +34,7 @@ class TransactionTile extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Text('Danh mục ${transaction.categoryId} • ${Formatters.formatDate(transaction.date)}'),
+      subtitle: Text('${transaction.categoryName ?? 'Danh mục'} • ${Formatters.formatDate(transaction.date)}'),
       trailing: Text(
         '${isIncome ? '+' : '-'}${Formatters.formatCurrency(transaction.amount)}',
         style: TextStyle(
