@@ -15,7 +15,7 @@
 
 ### Các chức năng chính:
 - **Tổng quan:** Xem tổng thu, tổng chi, chênh lệch theo tháng. Biểu đồ tròn phân bổ chi tiêu.
-- **Giao dịch:** Thêm/Sửa/Xóa giao dịch, đính kèm ảnh hóa đơn. Lọc theo tháng.
+- **Giao dịch:** Thêm/Xóa giao dịch, đính kèm ảnh hóa đơn. Lọc theo tháng.
 - **Ngân sách:** Đặt hạn mức chi tiêu theo danh mục, hiển thị thanh tiến độ đổi màu và cảnh báo khi vượt hạn mức.
 - **Cài đặt:** Quản lý danh mục thu/chi (Thêm/Xóa).
 
