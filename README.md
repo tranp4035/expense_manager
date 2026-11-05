@@ -104,8 +104,30 @@ Các tính năng dưới đây là minh chứng cho những yêu cầu Tầng 1,
 |---|---|
 | **Git** | Quản lý mã nguồn với các nhánh tính năng (`feature/...`) và commit message rõ ràng. |
 | **CI/CD** | GitHub Actions tự động hóa kiểm thử tại `.github/workflows/flutter_ci.yml`. |
-| **Kiểm thử** | Unit Test cho hàm `budgetColor` và Widget Test cho form nhập tiền. |
+| **Kiểm thử** | Unit Test cho `BudgetUtils` và `TransactionService`; Widget Test cho form giao dịch và kiểm tra responsive ở `test/widget/responsive_layout_test.dart`. |
 | **Tài liệu** | README hướng dẫn và giới thiệu dự án. |
+
+### Kiểm tra vòng đời và responsive
+
+**Rà soát tài nguyên giao diện:**
+
+| Tài nguyên | Vị trí | Cách giải phóng |
+|---|---|---|
+| `_amountController`, `_noteController` | `lib/features/transactions/transaction_form_screen.dart` | Hủy trong `State.dispose()`. |
+| `_amountController` | `lib/features/budgets/budget_form_bottom_sheet.dart` | Hủy trong `State.dispose()`. |
+| `nameController` | `lib/features/settings/category_management_screen.dart` | Hủy trong `finally` sau khi dialog đóng. |
+
+Đã rà soát `lib/`: không có `AnimationController`, `ScrollController`, `PageController`, `FocusNode`, `StreamSubscription` hoặc đăng ký `.listen()` cần dọn dẹp.
+
+**Kiểm tra co giãn giao diện:** widget test đặt chiều rộng màn hình ở 320, 768 và 1440 logical pixels. Trên màn hình hẹp, thẻ tổng quan xếp dọc, tiêu đề và nút xem tất cả chuyển thành hai hàng, còn nhãn ngân sách xếp dọc; trên tablet/desktop các nội dung này dùng hàng ngang. Form vẫn cuộn được và chú giải biểu đồ rút gọn số tiền dài để tránh tràn.
+
+| Màn hình/kiểm tra | Test | Kích thước |
+|---|---|---|
+| Dashboard, thẻ tổng quan và giao dịch gần đây | `test/widget/responsive_layout_test.dart` | 320, 768, 1440 px |
+| Thanh tiến độ ngân sách | `test/widget/responsive_layout_test.dart` | 320, 768, 1440 px |
+| Form giao dịch và khả năng cuộn | `test/widget/responsive_layout_test.dart` | 320, 768, 1440 px |
+
+**Kết quả kiểm tra ngày 05/11/2026:** `flutter test` pass toàn bộ 12 test; `flutter analyze` không có issue. Kiểm tra kích thước là widget test trong Flutter test runner, không thay thế việc chụp ảnh QA trên thiết bị thật.
 
 ### Tầng 3 — Phần cứng và quyền
 
